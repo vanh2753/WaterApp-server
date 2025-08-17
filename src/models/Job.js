@@ -15,6 +15,7 @@ Job.init({
             'Chờ Thanh tra',
             'Đã thay thế',
             'Đã cập nhật hệ thống',
+            'Hoàn thiện hồ sơ',
             'Xúc xả thành công',
             'Xúc xả thất bại'
         ),

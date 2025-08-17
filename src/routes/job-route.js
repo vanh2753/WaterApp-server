@@ -5,14 +5,21 @@ const { recordErrorMeter,
     getPendingInspectionJobs,
     completeMeterReplacement,
     recordEmergencyReplacement,
-    getCompletedReplacementJobs } = require('../controllers/job-controller')
+    getCompletedReplacementJobs,
+    updatedInSystem,
+    completeProjectDocument,
+    getJobHistory } = require('../controllers/job-controller')
+const { authenticateToken } = require('../middlewares/authenticateToken')
 
-router.post('/record-error-meter', recordErrorMeter)
-router.get('/get-job-list', getJobList)
-router.get('/get-pending-inspection-jobs', getPendingInspectionJobs)
-router.post('/record-emergency-replacement', recordEmergencyReplacement)
-router.get('/get-completed-replacement-jobs', getCompletedReplacementJobs)
-router.post('/handle-flushing/:job_id', handleflushing)
-router.post('/complete-meter-replacement/:job_id', completeMeterReplacement)
+router.post('/record-error-meter', authenticateToken, recordErrorMeter)
+router.get('/get-job-list', authenticateToken, getJobList)
+router.get('/get-pending-inspection-jobs', authenticateToken, getPendingInspectionJobs)
+router.post('/record-emergency-replacement', authenticateToken, recordEmergencyReplacement)
+router.get('/get-completed-replacement-jobs', authenticateToken, getCompletedReplacementJobs)
+router.get('/get-job-history', authenticateToken, getJobHistory)
+router.post('/handle-flushing/:job_id', authenticateToken, handleflushing)
+router.post('/complete-meter-replacement/:job_id', authenticateToken, completeMeterReplacement)
+router.post('/updated-in-system/:job_id', authenticateToken, updatedInSystem)
+router.post('/complete-project-document/:job_id', authenticateToken, completeProjectDocument)
 
 module.exports = router

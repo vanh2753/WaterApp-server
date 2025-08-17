@@ -72,7 +72,8 @@ const login = async (req, res, next) => {
 
         res.cookie('refresh_token', refresh_token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // Chỉ gửi qua HTTPS khi ở môi trường production
+            secure: false, // Chỉ gửi qua HTTPS khi ở môi trường production
+            sameSite: 'Lax',
             maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie hết hạn sau 7 ngày
         });
 
@@ -110,8 +111,8 @@ const refreshToken = async (req, res, next) => {
             })
         }
 
-        const decoded = verifyRefreshToken()
-        const user = await User.findOne({ where: { user_id: decoded.id } })
+        const decoded = verifyRefreshToken(refresh_token)
+        const user = await User.findOne({ where: { user_id: decoded.user_id } })
         if (!user) {
             return res.status(400).json({
                 EC: 1,
@@ -128,6 +129,7 @@ const refreshToken = async (req, res, next) => {
                 access_token: access_token
             }
         })
+
 
     } catch (error) {
         next(error)

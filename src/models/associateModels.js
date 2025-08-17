@@ -23,6 +23,9 @@ const applyAssociations = () => {
 
     User.hasMany(Notification, { foreignKey: 'user_id' });
     Job.hasMany(Notification, { foreignKey: 'job_id' });
+
+    JobHistory.belongsTo(User, { foreignKey: 'responsible_user_id' });
+    User.hasMany(JobHistory, { foreignKey: 'responsible_user_id' });
 }
 
 module.exports = applyAssociations

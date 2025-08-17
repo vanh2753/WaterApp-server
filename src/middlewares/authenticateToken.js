@@ -12,17 +12,19 @@ const authenticateToken = async (req, res, next) => {
         }
 
         const decode = verifyAccessToken(token)
-        if (!decode) {
-            return res.status(401).json({
-                EC: 1,
-                EM: "Invalid or expired access_token"
-            })
-        }
-
         req.user = decode
         next()
     } catch (error) {
-        console.log(error)
+        if (error.name === "TokenExpiredError") {
+            return res.status(401).json({
+                EC: 1,
+                EM: "Access token expired"
+            });
+        }
+        return res.status(401).json({
+            EC: 1,
+            EM: "Invalid access token"
+        });
     }
 }
 

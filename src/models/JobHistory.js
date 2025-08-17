@@ -18,6 +18,7 @@ JobHistory.init({
             'Mới',
             'Chờ Thanh tra',
             'Đã thay thế',
+            'Hoàn thiện hồ sơ',
             'Đã cập nhật hệ thống',
             'Xúc xả thành công',
             'Xúc xả thất bại'
