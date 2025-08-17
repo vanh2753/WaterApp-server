@@ -1,6 +1,98 @@
-.user-info {
-    background-color: rgb(144, 221, 176);
-    border-left: 5px solid green;
-    border-radius: 5px;
-    padding: 10px;
+.sidebar {
+    background: linear-gradient(180deg, #1e293b, #0f172a);
+    color: #fff;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar .user-info {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    text-align: center;
+}
+
+.sidebar .user-info div {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.sidebar .btn-danger {
+    font-size: 0.85rem;
+    padding: 5px 10px;
+    margin-top: 10px;
+}
+
+/* Tiêu đề menu */
+.features-list-title {
+    font-weight: bold;
+    font-size: 0.95rem;
+    color: #93c5fd;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Các item chức năng */
+.features-list {
+    margin-top: 20px;
+    flex: 1;
+}
+
+.features-list .menu-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    margin-bottom: 10px;
+}
+
+.features-list .menu-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Áp dụng gradient nền giống sidebar desktop */
+.offcanvas {
+    background: linear-gradient(180deg, #1e293b, #0f172a);
+    color: #fff !important;
+    width: 250px !important;
+}
+
+/* Tùy chỉnh nội dung bên trong Offcanvas */
+.offcanvas-body {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    /* nếu muốn sát lề */
+}
+
+.offcanvas .user-info {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    text-align: center;
+}
+
+.offcanvas .btn-danger {
+    font-size: 0.85rem;
+    padding: 5px 10px;
+    margin-top: 10px;
+}
+
+.offcanvas .menu-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    margin-bottom: 10px;
 }

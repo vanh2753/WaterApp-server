@@ -1,30 +1,17 @@
 import Table from 'react-bootstrap/Table';
-import { getJobList } from '../api/job-api';
-import { useEffect, useState } from 'react';
-import DetailJobModal from './DetailJobModal';
-import { useSelector } from 'react-redux'
-import './jobList.scss'
-import Button from 'react-bootstrap/Button';
-import Offcanvas from 'react-bootstrap/Offcanvas';
-const JobList = () => {
+import { getJobHistory } from '../api/job-api';
+import { useState, useEffect } from 'react';
+const JobHistoryList = () => {
 
     const [jobData, setJobData] = useState([])
-    const [selectedJob, setSlectJob] = useState({})
-    const [modalShow, setModalShow] = useState(false)
 
-    const user = useSelector(state => state.user.userInfo)
-    const role = user.role
-
-
-    const fetchData = async () => {
-        const res = await getJobList()
-        setJobData(res.DT)
-    }
-
-    const reloadJobList = async () => {
-        const res = await getJobList()
-        setJobData(res.DT)
-    }
+    useEffect(() => {
+        const fetchData = async () => {
+            const res = await getJobHistory()
+            setJobData(res.DT)
+        }
+        fetchData()
+    }, [])
 
     const renderStatus = (status) => {
         if (status === 'Mới') {
@@ -39,26 +26,24 @@ const JobList = () => {
         if (status === 'Chờ Thanh tra') {
             return <span className="tag text-warning">{status}</span>;
         }
+        if (status === 'Đã thay thế') {
+            return <span className="tag text-info">{status}</span>;
+        }
         return <span className="tag">{status}</span>;
     }
 
-
-    useEffect(() => {
-        fetchData()
-    }, [])
     return (
         <div className='p-md-3'>
-            <h3 className='text-center mt-3'>Danh sách công việc</h3>
+            <h3 className='text-center mt-3'>Lịch sử công việc</h3>
             <div className='table-responsive px-2'>
                 <Table bordered hover className='w-100'>
                     <thead>
                         <tr className=''>
                             <th className='text-center'>Mã việc</th>
-                            <th>Mã đồng hồ lỗi</th>
+                            <th className='text-center'>Trạng thái</th>
                             <th>Bộ phận phụ trách</th>
                             <th>Nhân viên phụ trách</th>
-                            <th className='text-center'>Trạng thái</th>
-                            <th className='text-center'>Thao tác</th>
+                            <th className='text-center'>Thời gian</th>
                         </tr>
                     </thead>
                     {
@@ -67,13 +52,10 @@ const JobList = () => {
                                 <tbody>
                                     <tr key={index} className="align-middle">
                                         <td className='text-center'>{job.job_id}</td>
-                                        <td>{job.OldMeter.serial_number}</td>
+                                        <td className='text-center'>{renderStatus(job.status)}</td>
                                         <td>{job.task_type}</td>
                                         <td>{job?.User?.full_name}</td>
-                                        <td className='text-center'>{renderStatus(job.status)}</td>
-                                        <td className='text-center'>
-                                            <button className='btn btn-info' onClick={() => { setSlectJob(job); setModalShow(true) }}>Xem </button>
-                                        </td>
+                                        <td>{new Date(job.createdAt).toLocaleString('vi-VN')} </td>
                                     </tr>
                                 </tbody>
                             )
@@ -81,9 +63,8 @@ const JobList = () => {
                     }
                 </Table>
             </div>
-            <DetailJobModal show={modalShow} onHide={() => setModalShow(false)} jobData={selectedJob} role={role} reloadJobList={reloadJobList} />
         </div>
     )
 }
 
-export default JobList
+export default JobHistoryList

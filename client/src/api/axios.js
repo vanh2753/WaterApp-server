@@ -1,7 +1,9 @@
 import axios from 'axios';
+import { refreshToken } from './user-api';
 
 const instance = axios.create({
-    baseURL: import.meta.env.VITE_API_URL
+    baseURL: import.meta.env.VITE_API_URL,
+    withCredentials: true
 });
 
 
@@ -26,22 +28,19 @@ instance.interceptors.response.use(
             originalRequest._retry = true;
             try {
                 // Gọi API refresh token (cookie HTTP-only sẽ tự gửi kèm)
-                const res = await axios.post(
-                    `${import.meta.env.VITE_API_URL}/refresh-token`,
-                    {},
-                    { withCredentials: true } // để cookie gửi kèm
-                );
-
-                const newAccessToken = res.data.access_token;
+                const res = await refreshToken()
+                const newAccessToken = res.DT.access_token;
                 localStorage.setItem('access_token', newAccessToken);
 
                 // Gắn lại token mới vào request cũ
                 originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
                 return instance(originalRequest);
             } catch (err) {
-                localStorage.removeItem('access_token');
-                localStorage.removeItem('refresh_token');
-                window.location.href = '/';
+                if (err.response?.status === 401) {
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    window.location.href = '/';
+                }
                 return Promise.reject(err);
             }
         }
