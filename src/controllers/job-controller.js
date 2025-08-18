@@ -29,7 +29,7 @@ const recordErrorMeter = async (req, res, next) => {
         const job = await Job.create(errorForm)
 
         if (job) {
-            await JobHistory.create({ job_id: job.job_id, status: 'Mới', task_type: 'Ghi thu', responsible_user_id: responsible_user_id })
+            await JobHistory.create({ job_id: job.job_id, status: 'Mới', task_type: 'QL Mạng', responsible_user_id: responsible_user_id })
         }
 
         return res.status(201).json({
