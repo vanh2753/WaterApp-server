@@ -19,7 +19,7 @@ const recordErrorMeter = async (req, res, next) => {
             status: 'Mới',
             task_type: 'Ghi thu',
             responsible_user_id: responsible_user_id,
-            meter_id_old: meter_old.id,
+            meter_id_old: meter_old.meter_id,
             customer_name: customer_name,
             address: address,
             meter_book_number: meter_book_number,
