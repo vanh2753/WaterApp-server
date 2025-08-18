@@ -8,7 +8,8 @@ const { recordErrorMeter,
     getCompletedReplacementJobs,
     updatedInSystem,
     completeProjectDocument,
-    getJobHistory } = require('../controllers/job-controller')
+    getJobHistory,
+    getJobChartData } = require('../controllers/job-controller')
 const { authenticateToken } = require('../middlewares/authenticateToken')
 
 router.post('/record-error-meter', authenticateToken, recordErrorMeter)
@@ -17,6 +18,7 @@ router.get('/get-pending-inspection-jobs', authenticateToken, getPendingInspecti
 router.post('/record-emergency-replacement', authenticateToken, recordEmergencyReplacement)
 router.get('/get-completed-replacement-jobs', authenticateToken, getCompletedReplacementJobs)
 router.get('/get-job-history', authenticateToken, getJobHistory)
+router.get('/get-job-chart-data', authenticateToken, getJobChartData)
 router.post('/handle-flushing/:job_id', authenticateToken, handleflushing)
 router.post('/complete-meter-replacement/:job_id', authenticateToken, completeMeterReplacement)
 router.post('/updated-in-system/:job_id', authenticateToken, updatedInSystem)

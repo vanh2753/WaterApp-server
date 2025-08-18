@@ -1,5 +1,7 @@
 const { Model } = require('sequelize')
-const { Job, JobHistory, User, Notificationm, Meter } = require('../models')
+const { Job, JobHistory, User, Notification, Meter, sequelize } = require('../models')
+
+const { Op } = require('sequelize');
 const recordErrorMeter = async (req, res, next) => {
     try {
         const { serial_number, customer_name, address, meter_book_number, meter_value } = req.body
@@ -42,6 +44,11 @@ const recordErrorMeter = async (req, res, next) => {
 
 const getJobList = async (req, res, next) => {
     try {
+        let { page } = req.query;
+        page = parseInt(page) || 1; // mặc định page = 1
+        const limit = 15;
+        const offset = (page - 1) * limit;
+
         const jobs = await Job.findAll({
             include: [
                 {
@@ -54,17 +61,24 @@ const getJobList = async (req, res, next) => {
                     attributes: ['user_id', 'full_name']
                 }
             ],
-            order: [['job_id', 'DESC']]
-        })
+            order: [['job_id', 'DESC']],
+            offset,
+            limit
+        });
+
         return res.status(200).json({
             EC: 0,
             EM: "Lấy danh sách toàn bộ công việc",
-            DT: jobs
-        })
+            DT: jobs,
+            pagination: {
+                page,
+                limit
+            }
+        });
     } catch (error) {
-        next(error)
+        next(error);
     }
-}
+};
 
 const handleflushing = async (req, res, next) => {
     try {
@@ -222,22 +236,104 @@ const completeProjectDocument = async (req, res, next) => {
 
 const getJobHistory = async (req, res, next) => {
     try {
+        let { page } = req.query;
+        page = parseInt(page) || 1; // mặc định page = 1
+        const limit = 15;
+        const offset = (page - 1) * limit;
+
         const jobHistory = await JobHistory.findAll({
             order: [['createdAt', 'DESC']],
             include: [{
                 model: User,
                 attributes: ["user_id", "full_name"]
-            }]
-        })
+            }],
+            offset,
+            limit
+        });
+
         return res.status(200).json({
             EC: 0,
             EM: "Lấy danh sách lịch sử",
-            DT: jobHistory
-        })
+            DT: jobHistory,
+            pagination: {
+                page,
+                limit
+            }
+        });
     } catch (error) {
-        next(error)
+        next(error);
     }
-}
+};
+
+
+const getJobChartData = async (req, res) => {
+    try {
+        const completedStatuses = ['Xúc xả thành công', 'Hoàn thiện hồ sơ'];
+
+        // 1. Tổng số công việc
+        const totalJobs = await Job.count();
+
+        // 2. Số công việc hoàn thành
+        const completedCount = await Job.count({
+            where: { status: { [Op.in]: completedStatuses } }
+        });
+
+        const uncompletedCount = totalJobs - completedCount;
+
+        // Chưa hoàn thành theo bộ phận
+        const uncompletedJobs = await Job.findAll({
+            attributes: [
+                [
+                    sequelize.literal(`
+            CASE 
+              WHEN status = 'Mới' THEN 'QL Mạng'
+              WHEN status = 'Chờ Thanh tra' THEN 'Thanh tra'
+              WHEN status = 'Đã thay thế' THEN 'Kinh doanh'
+              WHEN status = 'Đã cập nhật hệ thống' THEN 'Kỹ thuật'
+              ELSE 'Khác'
+            END
+          `),
+                    'department'
+                ],
+                [sequelize.fn('COUNT', sequelize.col('job_id')), 'count']
+            ],
+            where: { status: { [Op.notIn]: completedStatuses } },
+            group: ['department']
+        });
+
+        // Format PieChart
+        const pieChart = [
+            { name: 'Hoàn thành', value: completedCount },
+            { name: 'Chưa hoàn thành', value: totalJobs - completedCount }
+        ];
+
+        // Format BarChart
+        const barChart = uncompletedJobs.map(u => ({
+            department: u.get('department'),
+            value: Number(u.get('count'))
+        }));
+
+        return res.json({
+            EC: 0,
+            EM: 'Lấy dữ liệu thành công',
+            DT: {
+                totalJobs,
+                completed: completedCount,
+                uncompleted: uncompletedCount,
+                pieChart,
+                barChart
+            }
+        });
+    } catch (e) {
+        console.error(e);
+        return res.json({
+            EC: 1,
+            EM: 'Có lỗi khi lấy dữ liệu',
+            DT: {}
+        });
+    }
+};
+
 
 module.exports = {
     recordErrorMeter,
@@ -249,5 +345,6 @@ module.exports = {
     getCompletedReplacementJobs,
     updatedInSystem,
     completeProjectDocument,
-    getJobHistory
+    getJobHistory,
+    getJobChartData
 }
