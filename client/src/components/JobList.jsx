@@ -22,6 +22,7 @@ const JobList = () => {
         setHasMore(res.DT.length === 10) // nếu ít hơn 10 thì tức là hết data
     }
 
+
     const reloadJobList = async () => {
         const res = await getJobList(page)
         setJobData(res.DT)
@@ -67,7 +68,7 @@ const JobList = () => {
                         {jobData.map((job, index) => (
                             <tr key={index} className="align-middle">
                                 <td className='text-center'>{job.job_id}</td>
-                                <td>{job.OldMeter.serial_number}</td>
+                                <td>{job?.OldMeter?.serial_number}</td>
                                 <td>{job.task_type}</td>
                                 <td>{job?.User?.full_name}</td>
                                 <td className='text-center'>{renderStatus(job.status)}</td>

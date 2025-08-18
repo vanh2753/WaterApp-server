@@ -16,8 +16,8 @@ const DetailJobModal = (props) => {
 
     const [serialNumber, setSerialNumber] = useState('');
 
-    let completionDate = new Date(jobData?.updatedAt);
-    completionDate.setDate(completionDate.getDate() + import.meta.env.VITE_DEADLINE_DAY);
+    let currentDate = new Date(jobData?.updatedAt);
+    let completionDate = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000);
 
     const renderButtons = (role, task_type) => {
         if (role === 'QLM' && task_type === 'QL Mạng') {
@@ -166,8 +166,17 @@ const DetailJobModal = (props) => {
                                 <FaTachometerAlt className="icon" />
                                 <span>Thông tin đồng hồ</span>
                             </div>
-                            <div>Serial đồng hồ lỗi: {jobData.OldMeter?.serial_number}</div>
-                            <div>Số đọc đồng hồ: {jobData.meter_boook_number || 'Không có'}</div>
+                            {
+                                jobData.status === 'Đã thay thế'
+                                    ? <div>Serial đồng hồ thay thế: {jobData.NewMeter?.serial_number}</div>
+                                    : jobData.status === 'Chờ Thanh tra'
+                                        ? <div>Serial đồng hồ lỗi: {jobData.OldMeter?.serial_number}</div>
+                                        : jobData.status === 'Mới'
+                                            ? <div>Serial đồng hồ lỗi: {jobData.OldMeter?.serial_number}</div>
+                                            : <div>Serial đồng hồ hoạt động tốt: {jobData.OldMeter?.serial_number}</div>
+                            }
+
+                            <div>Số đọc đồng hồ: {jobData.meter_book_number || 'Không có'}</div>
                             <div>Chỉ số đồng hồ: {jobData.meter_value || 'Không có'}</div>
                         </div>
                         <div className='customer-info w-50'>
@@ -186,8 +195,17 @@ const DetailJobModal = (props) => {
                                 <FaTachometerAlt className="icon" />
                                 <span>Thông tin đồng hồ</span>
                             </div>
-                            <div>Serial đồng hồ lỗi: {jobData.OldMeter?.serial_number}</div>
-                            <div>Số đọc đồng hồ: {jobData.meter_boook_number || 'Không có'}</div>
+                            {
+                                jobData.status === 'Đã thay thế'
+                                    ? <div>Serial đồng hồ thay thế: {jobData.NewMeter?.serial_number}</div>
+                                    : jobData.status === 'Chờ Thanh tra'
+                                        ? <div>Serial đồng hồ lỗi: {jobData.OldMeter?.serial_number}</div>
+                                        : jobData.status === 'Mới'
+                                            ? <div>Serial đồng hồ lỗi: {jobData.OldMeter?.serial_number}</div>
+                                            : <div>Serial đồng hồ hoạt động tốt: {jobData.OldMeter?.serial_number}</div>
+                            }
+
+                            <div>Số đọc đồng hồ: {jobData.meter_book_number || 'Không có'}</div>
                             <div>Chỉ số đồng hồ: {jobData.meter_value || 'Không có'}</div>
                         </div>
                         <div className='customer-info '>
@@ -199,8 +217,8 @@ const DetailJobModal = (props) => {
                             <div>Địa chỉ: {jobData.address}</div>
                         </div>
                     </div>
-                    <div>Ngày tạo: {new Date(jobData.updatedAt).toLocaleDateString('vi-VN')}</div>
-                    <div style={{ color: 'red' }}>Hạn hoàn thành: {new Date(completionDate).toLocaleDateString('vi-VN')}</div>
+                    <div>Ngày tạo: {currentDate.toLocaleString('vi-VN', { hour12: false })}</div>
+                    <div style={{ color: 'red' }}>Hạn hoàn thành: {completionDate.toLocaleString('vi-VN', { hour12: false })}</div>
                     <div className='button-group d-flex justify-content-center '>
                         {renderButtons(role, jobData.task_type)}
                     </div>
