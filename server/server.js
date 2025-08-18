@@ -40,9 +40,9 @@ const connectDB = async () => {
 }
 connectDB()// Auto connect to database
 
-// database.sequelize.sync({ alter: true }).then(() => {
-//     console.log('Database synced')
-// })
+database.sequelize.sync({ alter: true }).then(() => {
+    console.log('Database synced')
+})
 
 
 app.use(errorHandler)
