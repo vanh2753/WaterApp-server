@@ -37,7 +37,7 @@ const HomePage = () => {
             <div className="menu-item" onClick={() => { navigate("/errors"); handleClose(); }}>Ghi nhận đồng hồ lỗi</div>
             <div className="menu-item" onClick={() => { navigate("/notifications"); handleClose(); }}>Thông báo</div>
             <div className="menu-item" onClick={() => { navigate("/job-history"); handleClose(); }}>Lịch sử công việc</div>
-            <div className="menu-item" onClick={() => { navigate("/stats"); handleClose(); }}>Thống kê</div>
+            <div className="menu-item" onClick={() => { navigate("/chart"); handleClose(); }}>Thống kê</div>
         </>
     );
     return (

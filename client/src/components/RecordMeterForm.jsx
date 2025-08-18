@@ -1,16 +1,34 @@
-import { Button, Checkbox, Form, Input, Card } from 'antd';
+import { useState } from 'react';
+import { Card, Button, Form } from 'react-bootstrap';
 import { recordErrorMeter } from '../api/job-api';
 
 const RecordMeterForm = () => {
+    const [formData, setFormData] = useState({
+        serial_number: '',
+        customer_name: '',
+        address: '',
+        meter_book_number: '',
+        meter_value: '',
+    });
 
-    const [form] = Form.useForm();
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    };
 
-    const handleSubmit = async (values) => {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         try {
-            const { serial_number, customer_name, address, meter_book_number, meter_value } = values;
+            const { serial_number, customer_name, address, meter_book_number, meter_value } = formData;
             const res = await recordErrorMeter(serial_number, customer_name, address, meter_book_number, meter_value);
             if (res.EC === 0) {
-                form.resetFields();
+                setFormData({
+                    serial_number: '',
+                    customer_name: '',
+                    address: '',
+                    meter_book_number: '',
+                    meter_value: '',
+                });
             }
         } catch (error) {
             console.log(error);
@@ -18,68 +36,72 @@ const RecordMeterForm = () => {
     };
 
     return (
-        <div className='d-flex justify-content-center mt-5 '>
-            <div className='' >
-                <Card className='' title="Ghi nhận đồng hồ lỗi" style={{ maxWidth: 600, width: '100%', border: '2px solid #ccc' }}>
-                    <Form
-                        form={form}
-                        name="basic"
-                        labelCol={{ xs: { span: 24 }, sm: { span: 8 } }}
-                        wrapperCol={{ xs: { span: 24 }, sm: { span: 16 } }}
-                        style={{ width: '100%', maxWidth: 600 }}
-                        initialValues={{ remember: true }}
-                        onFinish={handleSubmit}
-                        // onFinishFailed={onFinishFailed}
-                        autoComplete="off"
-                    >
-                        <Form.Item
-                            label="Serial đồng hồ lỗi"
+        <div className="d-flex justify-content-center mt-5 ">
+            <Card style={{ maxWidth: '600px', width: '100%' }} className="p-3 shadow-sm mx-2">
+                <Card.Title className="text-center">Ghi nhận đồng hồ lỗi</Card.Title>
+                <Form onSubmit={handleSubmit}>
+                    <Form.Group className="mb-3" controlId="serial_number">
+                        <Form.Label>*Serial đồng hồ lỗi</Form.Label>
+                        <Form.Control
+                            type="text"
                             name="serial_number"
-                            rules={[{ required: true, message: 'Vui lòng nhập ID đồng hồ' }]}
-                        >
-                            <Input />
-                        </Form.Item>
+                            value={formData.serial_number}
+                            onChange={handleChange}
+                            required
+                        />
+                    </Form.Group>
 
-                        <Form.Item
-                            label="Họ và tên khách hàng"
+                    <Form.Group className="mb-3" controlId="customer_name">
+                        <Form.Label>*Họ và tên khách hàng</Form.Label>
+                        <Form.Control
+                            type="text"
                             name="customer_name"
-                            rules={[{ required: true, message: 'Vui lòng nhập họ và tên khách hàng' }]}
-                        >
-                            <Input />
-                        </Form.Item>
+                            value={formData.customer_name}
+                            onChange={handleChange}
+                            required
+                        />
+                    </Form.Group>
 
-                        <Form.Item
-                            label="Địa chỉ"
+                    <Form.Group className="mb-3" controlId="address">
+                        <Form.Label>*Địa chỉ</Form.Label>
+                        <Form.Control
+                            type="text"
                             name="address"
-                            rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
-                        >
-                            <Input />
-                        </Form.Item>
+                            value={formData.address}
+                            onChange={handleChange}
+                            required
+                        />
+                    </Form.Group>
 
-                        <Form.Item
-                            label="Số đọc"
+                    <Form.Group className="mb-3" controlId="meter_book_number">
+                        <Form.Label>Số đọc</Form.Label>
+                        <Form.Control
+                            type="text"
                             name="meter_book_number"
-                        >
-                            <Input />
-                        </Form.Item>
+                            value={formData.meter_book_number}
+                            onChange={handleChange}
+                        />
+                    </Form.Group>
 
-                        <Form.Item
-                            label="Chỉ số đồng hồ"
+                    <Form.Group className="mb-3" controlId="meter_value">
+                        <Form.Label>Chỉ số đồng hồ</Form.Label>
+                        <Form.Control
+                            type="text"
                             name="meter_value"
-                        >
-                            <Input />
-                        </Form.Item>
+                            value={formData.meter_value}
+                            onChange={handleChange}
+                        />
+                    </Form.Group>
 
-                        <Form.Item className='text-center' label={null}>
-                            <Button type="primary" htmlType="submit">
-                                Tạo công việc mới
-                            </Button>
-                        </Form.Item>
-                    </Form>
-                </Card>
-            </div>
+                    <div className="d-flex justify-content-center">
+                        <Button type="submit" variant="primary" className="px-4 py-2">
+                            Tạo công việc mới
+                        </Button>
+                    </div>
+                </Form>
+            </Card>
         </div>
-    )
-}
+    );
+};
 
-export default RecordMeterForm
+export default RecordMeterForm;

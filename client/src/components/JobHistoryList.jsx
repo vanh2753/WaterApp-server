@@ -1,17 +1,22 @@
 import Table from 'react-bootstrap/Table';
 import { getJobHistory } from '../api/job-api';
 import { useState, useEffect } from 'react';
-const JobHistoryList = () => {
+import Button from 'react-bootstrap/Button';
 
+const JobHistoryList = () => {
     const [jobData, setJobData] = useState([])
+    const [page, setPage] = useState(1)
+    const [hasMore, setHasMore] = useState(true)
+
+    const fetchData = async (pageNum = 1) => {
+        const res = await getJobHistory(pageNum)
+        setJobData(res.DT)
+        setHasMore(res.DT.length === 10) // nếu ít hơn 10 thì coi như hết
+    }
 
     useEffect(() => {
-        const fetchData = async () => {
-            const res = await getJobHistory()
-            setJobData(res.DT)
-        }
-        fetchData()
-    }, [])
+        fetchData(page)
+    }, [page])
 
     const renderStatus = (status) => {
         if (status === 'Mới') {
@@ -46,22 +51,38 @@ const JobHistoryList = () => {
                             <th className='text-center'>Thời gian</th>
                         </tr>
                     </thead>
-                    {
-                        jobData.map((job, index) => {
-                            return (
-                                <tbody>
-                                    <tr key={index} className="align-middle">
-                                        <td className='text-center'>{job.job_id}</td>
-                                        <td className='text-center'>{renderStatus(job.status)}</td>
-                                        <td>{job.task_type}</td>
-                                        <td>{job?.User?.full_name}</td>
-                                        <td>{new Date(job.createdAt).toLocaleString('vi-VN')} </td>
-                                    </tr>
-                                </tbody>
-                            )
-                        })
-                    }
+                    <tbody>
+                        {jobData.map((job, index) => (
+                            <tr key={index} className="align-middle">
+                                <td className='text-center'>{job.job_id}</td>
+                                <td className='text-center'>{renderStatus(job.status)}</td>
+                                <td>{job.task_type}</td>
+                                <td>{job?.User?.full_name}</td>
+                                <td>{new Date(job.createdAt).toLocaleString('vi-VN')}</td>
+                            </tr>
+                        ))}
+                    </tbody>
                 </Table>
+            </div>
+
+            {/* Nút Prev/Next */}
+            <div className="mt-3 d-flex justify-content-center">
+                <Button
+                    variant="primary"
+                    className="me-2 px-3"
+                    disabled={page === 1}
+                    onClick={() => setPage(page - 1)}
+                >
+                    Prev
+                </Button>
+                <Button
+                    variant="primary"
+                    className='px-3'
+                    disabled={!hasMore}
+                    onClick={() => setPage(page + 1)}
+                >
+                    Next
+                </Button>
             </div>
         </div>
     )

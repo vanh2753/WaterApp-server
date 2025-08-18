@@ -5,25 +5,27 @@ import DetailJobModal from './DetailJobModal';
 import { useSelector } from 'react-redux'
 import './jobList.scss'
 import Button from 'react-bootstrap/Button';
-import Offcanvas from 'react-bootstrap/Offcanvas';
-const JobList = () => {
 
+const JobList = () => {
     const [jobData, setJobData] = useState([])
     const [selectedJob, setSlectJob] = useState({})
     const [modalShow, setModalShow] = useState(false)
+    const [page, setPage] = useState(1)
+    const [hasMore, setHasMore] = useState(true) // để check cuối trang
 
     const user = useSelector(state => state.user.userInfo)
     const role = user.role
 
-
-    const fetchData = async () => {
-        const res = await getJobList()
+    const fetchData = async (pageNum = 1) => {
+        const res = await getJobList(pageNum)
         setJobData(res.DT)
+        setHasMore(res.DT.length === 10) // nếu ít hơn 10 thì tức là hết data
     }
 
     const reloadJobList = async () => {
-        const res = await getJobList()
+        const res = await getJobList(page)
         setJobData(res.DT)
+        setHasMore(res.DT.length === 10)
     }
 
     const renderStatus = (status) => {
@@ -42,10 +44,10 @@ const JobList = () => {
         return <span className="tag">{status}</span>;
     }
 
-
     useEffect(() => {
-        fetchData()
-    }, [])
+        fetchData(page)
+    }, [page])
+
     return (
         <div className='p-md-3'>
             <h3 className='text-center mt-3'>Danh sách công việc</h3>
@@ -61,27 +63,50 @@ const JobList = () => {
                             <th className='text-center'>Thao tác</th>
                         </tr>
                     </thead>
-                    {
-                        jobData.map((job, index) => {
-                            return (
-                                <tbody>
-                                    <tr key={index} className="align-middle">
-                                        <td className='text-center'>{job.job_id}</td>
-                                        <td>{job.OldMeter.serial_number}</td>
-                                        <td>{job.task_type}</td>
-                                        <td>{job?.User?.full_name}</td>
-                                        <td className='text-center'>{renderStatus(job.status)}</td>
-                                        <td className='text-center'>
-                                            <button className='btn btn-info' onClick={() => { setSlectJob(job); setModalShow(true) }}>Xem </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            )
-                        })
-                    }
+                    <tbody>
+                        {jobData.map((job, index) => (
+                            <tr key={index} className="align-middle">
+                                <td className='text-center'>{job.job_id}</td>
+                                <td>{job.OldMeter.serial_number}</td>
+                                <td>{job.task_type}</td>
+                                <td>{job?.User?.full_name}</td>
+                                <td className='text-center'>{renderStatus(job.status)}</td>
+                                <td className='text-center'>
+                                    <button className='btn btn-info' onClick={() => { setSlectJob(job); setModalShow(true) }}>Xem</button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
                 </Table>
             </div>
-            <DetailJobModal show={modalShow} onHide={() => setModalShow(false)} jobData={selectedJob} role={role} reloadJobList={reloadJobList} />
+
+            {/* Nút Prev/Next */}
+            <div className="mt-3 d-flex justify-content-center">
+                <Button
+                    variant="primary"
+                    className="me-2 px-3"
+                    disabled={page === 1}
+                    onClick={() => setPage(page - 1)}
+                >
+                    Prev
+                </Button>
+                <Button
+                    variant="primary"
+                    className='px-3'
+                    disabled={!hasMore}
+                    onClick={() => setPage(page + 1)}
+                >
+                    Next
+                </Button>
+            </div>
+
+            <DetailJobModal
+                show={modalShow}
+                onHide={() => setModalShow(false)}
+                jobData={selectedJob}
+                role={role}
+                reloadJobList={reloadJobList}
+            />
         </div>
     )
 }

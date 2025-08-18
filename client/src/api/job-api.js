@@ -5,8 +5,8 @@ const recordErrorMeter = async (serial_number, customer_name, address, meter_boo
     return res.data;
 }
 
-const getJobList = async () => {
-    const res = await axios.get('/get-job-list')
+const getJobList = async (page = 1) => {
+    const res = await axios.get(`/get-job-list?page=${page}`)
     return res.data
 }
 
@@ -40,8 +40,13 @@ const recordEmergencyReplacement = async (job_id, serial_number) => {
     //todo
 }
 
-const getJobHistory = async () => {
-    const res = await axios.get('/get-job-history')
+const getJobHistory = async (page = 1) => {
+    const res = await axios.get(`/get-job-history?page=${page}`)
     return res.data
 }
-export { recordErrorMeter, getJobList, handleflushing, completeMeterReplacement, updatedInSystem, completeProjectDocument, recordEmergencyReplacement, getJobHistory }
+
+const getJobChartData = async () => {
+    const res = await axios.get(`/get-job-chart-data`)
+    return res.data
+}
+export { recordErrorMeter, getJobList, handleflushing, completeMeterReplacement, updatedInSystem, completeProjectDocument, recordEmergencyReplacement, getJobHistory, getJobChartData }
