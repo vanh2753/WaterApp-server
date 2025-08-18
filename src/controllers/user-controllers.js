@@ -72,8 +72,8 @@ const login = async (req, res, next) => {
 
         res.cookie('refresh_token', refresh_token, {
             httpOnly: true,
-            secure: false, // Chỉ gửi qua HTTPS khi ở môi trường production
-            sameSite: 'Lax',
+            secure: true,
+            sameSite: 'None',
             maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie hết hạn sau 7 ngày
         });
 
