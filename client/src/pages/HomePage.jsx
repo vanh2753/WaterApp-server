@@ -35,6 +35,10 @@ const HomePage = () => {
             </div>
             <div className="menu-item" onClick={() => { navigate("/jobs"); handleClose(); }}>Danh sách công việc</div>
             <div className="menu-item" onClick={() => { navigate("/errors"); handleClose(); }}>Ghi nhận đồng hồ lỗi</div>
+            {
+                userInfo.role === 'TT' &&
+                <div className="menu-item" onClick={() => { navigate("/emergency-replacement"); handleClose(); }}>Thay thế đột xuất</div>
+            }
             <div className="menu-item" onClick={() => { navigate("/notifications"); handleClose(); }}>Thông báo</div>
             <div className="menu-item" onClick={() => { navigate("/job-history"); handleClose(); }}>Lịch sử công việc</div>
             <div className="menu-item" onClick={() => { navigate("/chart"); handleClose(); }}>Thống kê</div>

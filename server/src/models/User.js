@@ -30,7 +30,7 @@ User.init({
         },
     },
     role: {
-        type: DataTypes.ENUM('admin', 'GT', 'QLM', 'TT', 'KT', 'KD'),
+        type: DataTypes.ENUM('admin', 'TP', 'GT', 'QLM', 'TT', 'KT', 'KD'),
         allowNull: false,
     },
 },

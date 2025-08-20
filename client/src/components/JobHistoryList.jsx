@@ -11,7 +11,7 @@ const JobHistoryList = () => {
     const fetchData = async (pageNum = 1) => {
         const res = await getJobHistory(pageNum)
         setJobData(res.DT)
-        setHasMore(res.DT.length === 10) // nếu ít hơn 10 thì coi như hết
+        setHasMore(res.DT.length === 15) // nếu ít hơn 10 thì coi như hết
     }
 
     useEffect(() => {

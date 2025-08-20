@@ -78,17 +78,22 @@ const JobChart = () => {
 
                 {/* BarChart */}
                 <div className="flex-1 bg-white rounded-2xl shadow p-4 flex flex-col items-center">
-                    <h2 className="text-lg font-semibold mb-4">Số công việc chưa hoàn thành theo bộ phận</h2>
+                    <h2 className="text-lg font-semibold mb-4">Công việc chưa hoàn thành theo bộ phận</h2>
                     <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={data.barChart} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                        <BarChart
+                            data={data.barChart}
+                            margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                            barCategoryGap="5%" // chỉnh khoảng cách giữa cột
+                        >
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="department" />
-                            <YAxis />
+                            <YAxis allowDecimals={false} />
                             <Tooltip />
                             <Legend />
-                            <Bar dataKey="value" fill="#60a5fa" />
+                            <Bar dataKey="value" name="Số công việc chưa hoàn thành" fill="#60a5fa" barSize={50} />
                         </BarChart>
                     </ResponsiveContainer>
+
                 </div>
             </div>
         </div>

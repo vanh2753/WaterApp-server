@@ -4,7 +4,7 @@ const { Job, JobHistory, User, Notification, Meter, sequelize } = require('../mo
 const { Op } = require('sequelize');
 const recordErrorMeter = async (req, res, next) => {
     try {
-        const { serial_number, customer_name, address, meter_book_number, meter_value } = req.body
+        const { serial_number, customer_name, address, meter_book_number, meter_value, meter_status, note } = req.body
         const responsible_user_id = req.user.user_id
 
         const meter_old = await Meter.findOne({ where: { serial_number: serial_number } })
@@ -15,6 +15,11 @@ const recordErrorMeter = async (req, res, next) => {
             })
         }
 
+        await meter_old.update({
+            status: meter_status,
+            note: meter_status === "Khác" ? note : null // chỉ có note khi status = Khác
+        });
+
         const errorForm = {
             status: 'Mới',
             task_type: 'Ghi thu',
@@ -23,7 +28,8 @@ const recordErrorMeter = async (req, res, next) => {
             customer_name: customer_name,
             address: address,
             meter_book_number: meter_book_number,
-            meter_value: meter_value
+            meter_value: meter_value,
+
         }
 
         const job = await Job.create(errorForm)
@@ -42,48 +48,85 @@ const recordErrorMeter = async (req, res, next) => {
     }
 }
 
+
+
 const getJobList = async (req, res, next) => {
     try {
         let { page } = req.query;
-        page = parseInt(page) || 1; // mặc định page = 1
+        page = parseInt(page) || 1;
         const limit = 15;
         const offset = (page - 1) * limit;
 
-        const jobs = await Job.findAll({
+        const { role } = req.user;
+
+        const queryOptions = {
             include: [
                 {
                     model: Meter,
-                    as: 'OldMeter',
-                    attributes: ['serial_number']
+                    as: "OldMeter",
+                    attributes: ["serial_number", "status", "note"],
                 },
                 {
                     model: Meter,
-                    as: 'NewMeter',
-                    attributes: ['serial_number']
+                    as: "NewMeter",
+                    attributes: ["serial_number", "status", "note"],
                 },
                 {
                     model: User,
-                    attributes: ['user_id', 'full_name']
-                }
+                    attributes: ["user_id", "full_name"],
+                },
             ],
-            order: [['job_id', 'DESC']],
+            order: [["job_id", "DESC"]],
             offset,
-            limit
-        });
+            limit,
+        };
+
+        switch (role) {
+            case "TP":
+                break;
+            case "GT":
+            case "QLM":
+                queryOptions.where = { status: "Mới" };
+                break;
+            case "TT":
+                queryOptions.where = { status: "Chờ Thanh tra" };
+                break;
+            case "KD":
+                queryOptions.where = { status: "Đã thay thế" };
+                break;
+            case "KT":
+                queryOptions.where = {
+                    status: {
+                        [Op.in]: ["Đã cập nhật hệ thống", "Hoàn thiện hồ sơ"]
+                    }
+                };
+                break;
+            default:
+                return res.status(403).json({
+                    EC: 1,
+                    EM: "Role không hợp lệ",
+                    DT: [],
+                });
+        }
+
+        const { rows: jobs, count } = await Job.findAndCountAll(queryOptions);
 
         return res.status(200).json({
             EC: 0,
-            EM: "Lấy danh sách toàn bộ công việc",
+            EM: "Lấy danh sách công việc thành công",
             DT: jobs,
             pagination: {
                 page,
-                limit
-            }
+                limit,
+                totalRecords: count,
+                totalPages: Math.ceil(count / limit),
+            },
         });
     } catch (error) {
         next(error);
     }
 };
+
 
 const handleflushing = async (req, res, next) => {
     try {
@@ -172,8 +215,69 @@ const completeMeterReplacement = async (req, res, next) => {
 }
 
 const recordEmergencyReplacement = async (req, res, next) => {
-    //todo
+    try {
+        const { serial_number, new_serial, customer_name, address, meter_book_number, meter_value, meter_status, note } = req.body
+        const responsible_user_id = req.user.user_id
+
+        // tìm đồng hồ cũ
+        const meter_old = await Meter.findOne({ where: { serial_number } })
+        if (!meter_old) {
+            return res.status(400).json({
+                EC: 1,
+                EM: "Đồng hồ cũ không tồn tại trong hệ thống"
+            })
+        }
+
+        // tìm đồng hồ mới
+        const meter_new = await Meter.findOne({ where: { serial_number: new_serial } })
+        if (!meter_new) {
+            return res.status(400).json({
+                EC: 1,
+                EM: "Đồng hồ mới không tồn tại trong hệ thống"
+            })
+        }
+
+        // cập nhật trạng thái và note cho đồng hồ cũ
+        await meter_old.update({
+            status: meter_status,
+            note: meter_status === "Khác" ? note : null
+        });
+
+        // tạo công việc thay thế khẩn cấp
+        const errorForm = {
+            status: 'Đã thay thế',
+            task_type: 'Thanh tra',
+            responsible_user_id,
+            meter_id_old: meter_old.meter_id,
+            meter_id_new: meter_new.meter_id,
+            customer_name,
+            address,
+            meter_book_number,
+            meter_value,
+            emergency_replacement: true
+        }
+
+        const job = await Job.create(errorForm)
+
+        if (job) {
+            await JobHistory.create({
+                job_id: job.job_id,
+                status: 'Đã thay thế',
+                task_type: 'Thanh tra',
+                responsible_user_id
+            })
+        }
+
+        return res.status(201).json({
+            EC: 0,
+            EM: "Ghi nhận thay thế khẩn cấp thành công",
+            DT: job
+        })
+    } catch (error) {
+        next(error)
+    }
 }
+
 
 const getCompletedReplacementJobs = async (req, res, next) => {
     try {

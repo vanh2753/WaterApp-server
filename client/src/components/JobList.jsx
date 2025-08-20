@@ -19,7 +19,7 @@ const JobList = () => {
     const fetchData = async (pageNum = 1) => {
         const res = await getJobList(pageNum)
         setJobData(res.DT)
-        setHasMore(res.DT.length === 10) // nếu ít hơn 10 thì tức là hết data
+        setHasMore(res.DT.length === 15) // nếu ít hơn 10 thì tức là hết data
     }
 
 
@@ -33,7 +33,10 @@ const JobList = () => {
         if (status === 'Mới') {
             return <span className="tag text-primary">{status}</span>;
         }
-        if (status === 'Xúc xả thành công' || status === 'Đã cập nhật hệ thống' || status === "Hoàn thiện hồ sơ") {
+        if (status === 'Đã cập nhật hệ thống') {
+            return <span className="tag text-info">{status}</span>;
+        }
+        if (status === 'Xúc xả thành công' || status === "Hoàn thiện hồ sơ") {
             return <span className="tag text-success">{status}</span>;
         }
         if (status === 'Xúc xả thất bại') {

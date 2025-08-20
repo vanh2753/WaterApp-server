@@ -5,6 +5,7 @@ import JobList from '../components/JobList'
 import RecordMeterForm from '../components/RecordMeterForm'
 import JobHistoryList from "../components/JobHistoryList";
 import JobChart from "../components/JobChart";
+import RecordEmergencyReplaceForm from "../components/RecordEmergencyReplaceForm ";
 
 const AppRoutes = () => {
     return (
@@ -16,6 +17,7 @@ const AppRoutes = () => {
                     <Route path="errors" element={<RecordMeterForm />} />
                     <Route path='job-history' element={<JobHistoryList />} />
                     <Route path='chart' element={<JobChart />} />
+                    <Route path='emergency-replacement' element={<RecordEmergencyReplaceForm />} />
                 </Route>
             </Routes>
         </BrowserRouter>
