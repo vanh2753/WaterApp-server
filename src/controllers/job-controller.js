@@ -93,7 +93,11 @@ const getJobList = async (req, res, next) => {
                 queryOptions.where = { status: "Đã thay thế" };
                 break;
             case "KT":
-                queryOptions.where = { status: "Đã cập nhật hệ thống" };
+                queryOptions.where = {
+                    status: {
+                        [Op.in]: ["Đã cập nhật hệ thống", "Hoàn thiện hồ sơ"]
+                    }
+                };
                 break;
             default:
                 return res.status(403).json({
