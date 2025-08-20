@@ -3,36 +3,49 @@ const sequelize = require('../configs/db-config');
 
 class Meter extends Model { }
 
-Meter.init({
-    meter_id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
+Meter.init(
+    {
+        meter_id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true,
+        },
+        serial_number: {
+            type: DataTypes.STRING(50),
+            allowNull: false,
+            unique: true,
+        },
+        customer_name: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
+        },
+        address: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
+        },
+        status: {
+            type: DataTypes.ENUM(
+                'Sử dụng',
+                "Chạy nhanh",
+                "Chạy chậm",
+                "Kẹt đồng hồ",
+                "Vỡ mặt",
+                "Mất cắp",
+                "Khác"
+            ),
+            allowNull: false,
+            defaultValue: "Sử dụng",
+        },
+        note: {
+            type: DataTypes.STRING(255),
+            allowNull: true, // chỉ có giá trị khi status = 'Khác'
+        },
     },
-    serial_number: {
-        type: DataTypes.STRING(50),
-        allowNull: false,
-        unique: true
-    },
-    customer_name: {
-        type: DataTypes.STRING(255),
-        allowNull: false
-    },
-    address: {
-        type: DataTypes.STRING(255),
-        allowNull: false
-    },
-    status: {
-        type: DataTypes.ENUM('Sử dụng', 'Hỏng'),
-        allowNull: false,
-        defaultValue: 'Sử dụng'
-    },
-},
     {
         sequelize,
-        modelName: 'Meter',
-        tableName: 'meters',
-        timestamps: true
+        modelName: "Meter",
+        tableName: "meters",
+        timestamps: true,
     }
 );
 
