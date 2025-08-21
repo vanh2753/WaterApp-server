@@ -246,21 +246,10 @@ const recordEmergencyReplacement = async (req, res, next) => {
         const responsible_user_id = req.user.user_id
 
         // tìm đồng hồ cũ
-        const meter_old = await Meter.findOne({ where: { serial_number } })
-        if (!meter_old) {
-            return res.status(400).json({
-                EC: 1,
-                EM: "Đồng hồ cũ không tồn tại trong hệ thống"
-            })
-        }
+       const meter_old = await Meter.create({ serial_number, serial_number, status: meter_status, customer_name, address, note: meter_status === "Khác" ? note : null })
 
         // tìm đồng hồ mới
-        const meter_new = await Meter.create({ serial_number: new_serial, status: meter_status, customer_name, address, note: meter_status === "Khác" ? note : null })
-        // cập nhật trạng thái và note cho đồng hồ cũ
-        await meter_old.update({
-            status: meter_status,
-            note: meter_status === "Khác" ? note : null
-        });
+        const meter_new = await Meter.create({ serial_number: new_serial, status: "Sử dụng" })
 
         // tạo công việc thay thế khẩn cấp
         const errorForm = {
