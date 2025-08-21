@@ -49,4 +49,9 @@ const getJobChartData = async () => {
     const res = await axios.get(`/get-job-chart-data`)
     return res.data
 }
-export { recordErrorMeter, getJobList, handleflushing, completeMeterReplacement, updatedInSystem, completeProjectDocument, recordEmergencyReplacement, getJobHistory, getJobChartData }
+
+const updateJob = async (job_id, serial_number, customer_name, address, meter_book_number, meter_value, meter_status, note) => {
+    const res = await axios.put(`/job/${job_id}`, { serial_number, customer_name, address, meter_book_number, meter_value, meter_status, note });
+    return res.data
+}
+export { recordErrorMeter, getJobList, handleflushing, completeMeterReplacement, updatedInSystem, completeProjectDocument, recordEmergencyReplacement, getJobHistory, getJobChartData, updateJob }

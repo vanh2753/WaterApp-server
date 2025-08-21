@@ -34,7 +34,11 @@ const HomePage = () => {
                 <span>Menu chức năng</span>
             </div>
             <div className="menu-item" onClick={() => { navigate("/jobs"); handleClose(); }}>Danh sách công việc</div>
-            <div className="menu-item" onClick={() => { navigate("/errors"); handleClose(); }}>Ghi nhận đồng hồ lỗi</div>
+            {
+                userInfo.role === 'GT' &&
+                <div className="menu-item" onClick={() => { navigate("/errors"); handleClose(); }}>Ghi nhận đồng hồ lỗi</div>
+
+            }
             {
                 userInfo.role === 'TT' &&
                 <div className="menu-item" onClick={() => { navigate("/emergency-replacement"); handleClose(); }}>Thay thế đột xuất</div>

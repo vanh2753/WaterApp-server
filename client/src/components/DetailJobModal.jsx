@@ -6,6 +6,7 @@ import { IoMdInformationCircle } from "react-icons/io";
 import { FaTachometerAlt } from "react-icons/fa";
 import { IoPersonSharp } from "react-icons/io5";
 import { handleflushing, completeMeterReplacement, updatedInSystem, completeProjectDocument, } from '../api/job-api'
+import RecordEditForm from './RecordEditForm';
 
 const DetailJobModal = (props) => {
 
@@ -15,9 +16,16 @@ const DetailJobModal = (props) => {
     const onHide = props.onHide
 
     const [serialNumber, setSerialNumber] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
+
 
     let currentDate = new Date(jobData?.updatedAt);
     let completionDate = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000);
+
+    const handleCloseEditModal = () => {
+        setIsEditing(false); // reset edit mode
+        onHide();            // đóng modal
+    };
 
     const renderButtons = (role, task_type) => {
         if (role === 'QLM' && task_type === 'Ghi thu') {
@@ -247,9 +255,26 @@ const DetailJobModal = (props) => {
                     </div>
                     <div>Ngày tạo: {currentDate.toLocaleString('vi-VN', { hour12: false })}</div>
                     <div style={{ color: 'red' }}>Hạn hoàn thành: {completionDate.toLocaleString('vi-VN', { hour12: false })}</div>
-                    <div className='button-group d-flex justify-content-center '>
+                    {
+                        isEditing && role === 'GT' && jobData.status === 'Mới' &&
+                        <RecordEditForm
+                            jobData={jobData}
+                            onSave={() => {
+                                reloadJobList();
+                                handleCloseEditModal();
+                            }}
+                            onCancel={() => setIsEditing(false)}
+                        />
+                    }
+
+                    {/* phần hiển thị detail như cũ */}
+                    <div className='button-group d-flex justify-content-center'>
+                        {role === 'GT' && jobData.status === 'Mới' && (
+                            <Button onClick={() => setIsEditing(true)} className='btn btn-warning'>Sửa</Button>
+                        )}
                         {renderButtons(role, jobData.task_type)}
                     </div>
+
                 </Modal.Body>
             </Modal>
         </div>

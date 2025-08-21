@@ -48,6 +48,55 @@ const recordErrorMeter = async (req, res, next) => {
     }
 }
 
+const updateJob = async (req, res, next) => {
+    try {
+        const { job_id } = req.params; // lấy từ URL: /api/job/:job_id
+        const { serial_number, customer_name, address, meter_book_number, meter_value, meter_status, note } = req.body;
+        const responsible_user_id = req.user.user_id;
+
+        // 1. Kiểm tra Job có tồn tại không
+        const job = await Job.findByPk(job_id);
+        if (!job) {
+            return res.status(404).json({
+                EC: 1,
+                EM: "Không tìm thấy công việc"
+            });
+        }
+
+        // 2. Kiểm tra đồng hồ theo serial_number
+        const meter = await Meter.findOne({ where: { serial_number } });
+        if (!meter) {
+            return res.status(400).json({
+                EC: 1,
+                EM: "Đồng hồ không tồn tại trong hệ thống"
+            });
+        }
+
+        // 3. Update meter (status, note)
+        await meter.update({
+            status: meter_status,
+            note: meter_status === "Khác" ? note : null
+        });
+
+        // 4. Update job
+        await job.update({
+            customer_name,
+            address,
+            meter_book_number,
+            meter_value,
+            meter_id_old: meter.meter_id, // gắn lại đồng hồ
+        });
+
+        return res.status(200).json({
+            EC: 0,
+            EM: "Cập nhật công việc thành công",
+            DT: job
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 
 
 const getJobList = async (req, res, next) => {
@@ -85,6 +134,12 @@ const getJobList = async (req, res, next) => {
             case "TP":
                 break;
             case "GT":
+                queryOptions.where = {
+                    status: {
+                        [Op.in]: ["Mới", "Hoàn thiện hồ sơ", "Xúc xả thành công"]
+                    }
+                };
+                break;
             case "QLM":
                 queryOptions.where = { status: "Mới" };
                 break;
@@ -97,7 +152,7 @@ const getJobList = async (req, res, next) => {
             case "KT":
                 queryOptions.where = {
                     status: {
-                        [Op.in]: ["Đã cập nhật hệ thống", "Hoàn thiện hồ sơ"]
+                        [Op.in]: ["Đã cập nhật hệ thống", "Hoàn thiện hồ sơ", "Đã thay thế"]
                     }
                 };
                 break;
@@ -455,5 +510,6 @@ module.exports = {
     updatedInSystem,
     completeProjectDocument,
     getJobHistory,
-    getJobChartData
+    getJobChartData,
+    updateJob
 }
