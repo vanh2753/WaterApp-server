@@ -17,11 +17,11 @@ Meter.init(
         },
         customer_name: {
             type: DataTypes.STRING(255),
-            allowNull: false,
+            allowNull: true,
         },
         address: {
             type: DataTypes.STRING(255),
-            allowNull: false,
+            allowNull: true,
         },
         status: {
             type: DataTypes.ENUM(
