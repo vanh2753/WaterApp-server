@@ -13,15 +13,14 @@ Meter.init(
         serial_number: {
             type: DataTypes.STRING(50),
             allowNull: false,
-            unique: true,
         },
         customer_name: {
             type: DataTypes.STRING(255),
-            allowNull: false,
+            allowNull: true,
         },
         address: {
             type: DataTypes.STRING(255),
-            allowNull: false,
+            allowNull: true,
         },
         status: {
             type: DataTypes.ENUM(

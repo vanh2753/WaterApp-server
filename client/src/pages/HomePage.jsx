@@ -76,10 +76,10 @@ const HomePage = () => {
                             </div>
                         </div>
                         <div className="component-container col-md-10 col-sm-12">
-                            <div style={{ backgroundColor: '#0f172a', height: '150px' }} className="d-flex justify-content-center align-items-center w-100">
+                            <div style={{ backgroundColor: '#2B579A', height: '150px' }} className="d-flex justify-content-center align-items-center w-100">
                                 {/* Nút menu cho mobile */}
                                 <div className="d-md-none me-3" >
-                                    <Button style={{ backgroundColor: '#0f172a', border: 'none', boxShadow: '' }} onClick={handleShow}>
+                                    <Button style={{ backgroundColor: '#2B579A', border: 'none', boxShadow: '' }} onClick={handleShow}>
                                         <AiOutlineMenu size={20} />
                                     </Button>
                                 </div>
@@ -92,10 +92,13 @@ const HomePage = () => {
                                     <img
                                         src={logoCom}
                                         alt="Logo"
-                                        style={{ width: "100%", height: "100%", objectFit: "contain", backgroundColor: '#0f172a' }}
+                                        style={{ width: "100%", height: "100%", objectFit: "contain", backgroundColor: '#2B579A' }}
                                     />
                                 </div>
-                                <h2 className="text-center text-white ms-3  ">HỆ THỐNG QUẢN LÝ ĐỒNG HỒ NƯỚC</h2>
+                                <div className="d-flex flex-column">
+                                    <h2 className="text-center text-white ms-3  ">HỆ THỐNG QUẢN LÝ ĐỒNG HỒ NƯỚC</h2>
+                                    <h4 className="text-center text-white">Đội KDNS Bắc Thăng Long</h4>
+                                </div>
                             </div>
                             <Outlet />
                         </div>

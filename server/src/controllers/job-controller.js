@@ -7,18 +7,7 @@ const recordErrorMeter = async (req, res, next) => {
         const { serial_number, customer_name, address, meter_book_number, meter_value, meter_status, note } = req.body
         const responsible_user_id = req.user.user_id
 
-        const meter_old = await Meter.findOne({ where: { serial_number: serial_number } })
-        if (!meter_old) {
-            return res.status(400).json({
-                EC: 1,
-                EM: "Đồng hồ không tồn tại trong hệ thống"
-            })
-        }
-
-        await meter_old.update({
-            status: meter_status,
-            note: meter_status === "Khác" ? note : null // chỉ có note khi status = Khác
-        });
+        const meter_old = await Meter.create({ serial_number, customer_name, address, status: meter_status, note: meter_status === "Khác" ? note : null })
 
         const errorForm = {
             status: 'Mới',
@@ -64,19 +53,7 @@ const updateJob = async (req, res, next) => {
         }
 
         // 2. Kiểm tra đồng hồ theo serial_number
-        const meter = await Meter.findOne({ where: { serial_number } });
-        if (!meter) {
-            return res.status(400).json({
-                EC: 1,
-                EM: "Đồng hồ không tồn tại trong hệ thống"
-            });
-        }
-
-        // 3. Update meter (status, note)
-        await meter.update({
-            status: meter_status,
-            note: meter_status === "Khác" ? note : null
-        });
+        const meter = await Meter.create({ serial_number, customer_name, address, status: meter_status, note: meter_status === "Khác" ? note : null });
 
         // 4. Update job
         await job.update({
@@ -248,13 +225,7 @@ const completeMeterReplacement = async (req, res, next) => {
                 EM: "Không tìm thấy công việc"
             })
         }
-        const newMeter = await Meter.findOne({ where: { serial_number: serial_number } })
-        if (!newMeter) {
-            return res.status(400).json({
-                EC: 1,
-                EM: "Vui lòng kiểm tra lại serial đồng hồ"
-            })
-        }
+        const newMeter = await Meter.create({ serial_number, status: 'Sử dụng' })
 
         await job.update({ meter_id_new: newMeter.meter_id, status: 'Đã thay thế', task_type: 'Thanh tra', responsible_user_id: responsible_user_id })
         await JobHistory.create({ job_id: job.job_id, status: 'Đã thay thế', task_type: 'Thanh tra', responsible_user_id: responsible_user_id })
@@ -275,28 +246,10 @@ const recordEmergencyReplacement = async (req, res, next) => {
         const responsible_user_id = req.user.user_id
 
         // tìm đồng hồ cũ
-        const meter_old = await Meter.findOne({ where: { serial_number } })
-        if (!meter_old) {
-            return res.status(400).json({
-                EC: 1,
-                EM: "Đồng hồ cũ không tồn tại trong hệ thống"
-            })
-        }
+        const meter_old = await Meter.create({ serial_number, serial_number, status: meter_status, customer_name, address, note: meter_status === "Khác" ? note : null })
 
         // tìm đồng hồ mới
-        const meter_new = await Meter.findOne({ where: { serial_number: new_serial } })
-        if (!meter_new) {
-            return res.status(400).json({
-                EC: 1,
-                EM: "Đồng hồ mới không tồn tại trong hệ thống"
-            })
-        }
-
-        // cập nhật trạng thái và note cho đồng hồ cũ
-        await meter_old.update({
-            status: meter_status,
-            note: meter_status === "Khác" ? note : null
-        });
+        const meter_new = await Meter.create({ serial_number: new_serial, status: "Sử dụng" })
 
         // tạo công việc thay thế khẩn cấp
         const errorForm = {
