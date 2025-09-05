@@ -54,4 +54,12 @@ const updateJob = async (job_id, serial_number, customer_name, address, meter_bo
     const res = await axios.put(`/job/${job_id}`, { serial_number, customer_name, address, meter_book_number, meter_value, meter_status, note });
     return res.data
 }
-export { recordErrorMeter, getJobList, handleflushing, completeMeterReplacement, updatedInSystem, completeProjectDocument, recordEmergencyReplacement, getJobHistory, getJobChartData, updateJob }
+
+const downloadReport = async (month, year) => {
+    const res = await axios.get(`/export-file`, {
+        params: { month, year },
+        responseType: "blob", // dùng để download file
+    });
+    return res.data;
+};
+export { recordErrorMeter, getJobList, handleflushing, completeMeterReplacement, updatedInSystem, completeProjectDocument, recordEmergencyReplacement, getJobHistory, getJobChartData, updateJob, downloadReport }

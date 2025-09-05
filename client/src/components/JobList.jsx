@@ -5,6 +5,8 @@ import DetailJobModal from './DetailJobModal';
 import { useSelector } from 'react-redux'
 import './jobList.scss'
 import Button from 'react-bootstrap/Button';
+import { FaFileDownload } from "react-icons/fa";
+import { downloadReport } from '../api/job-api';
 
 const JobList = () => {
     const [jobData, setJobData] = useState([])
@@ -27,6 +29,31 @@ const JobList = () => {
         const res = await getJobList(page)
         setJobData(res.DT)
         setHasMore(res.DT.length === 10)
+    }
+
+    const hanldeDownload = async () => {
+        try {
+            // Lấy tháng và năm hiện tại (hoặc lấy từ input/select của user)
+            const now = new Date();
+            const month = now.getMonth() + 1; // tháng trong JS bắt đầu từ 0
+            const year = now.getFullYear();
+
+            const fileData = await downloadReport(month, year);
+
+            // Tạo URL để tải file
+            const url = window.URL.createObjectURL(new Blob([fileData]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", `Bao_cao_thang_${month}_${year}.xlsx`); // hoặc .pdf
+            document.body.appendChild(link);
+            link.click();
+
+            // Dọn rác
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("Download error", err);
+        }
     }
 
     const renderStatus = (status) => {
@@ -54,7 +81,27 @@ const JobList = () => {
 
     return (
         <div className='p-md-3'>
-            <h3 className='text-center mt-3'>Danh sách công việc</h3>
+            <div className="row align-items-center">
+                <div className="col-4"></div>
+                <div className="col-4 text-center">
+                    <h3 className="mt-3">Danh sách công việc</h3>
+                </div>
+                {
+                    role === 'TT' &&
+                    <div className="col-4 text-end">
+                        <Button style={{
+                            backgroundColor: "#4CAF50",   // xanh lá dịu
+                            border: "none",              // bỏ viền
+                            borderRadius: "8px",         // bo góc mềm 
+                        }}
+                            onClick={hanldeDownload}>
+                            <FaFileDownload className='pe-1' />Tải báo cáo
+                        </Button>
+                    </div>
+                }
+
+            </div>
+
             <div className='table-responsive px-2'>
                 <Table bordered hover className='w-100'>
                     <thead>

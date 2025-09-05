@@ -1,5 +1,7 @@
 const { Model } = require('sequelize')
 const { Job, JobHistory, User, Notification, Meter, sequelize } = require('../models')
+const ExcelJS = require("exceljs");
+const path = require('path');
 
 const { Op } = require('sequelize');
 const recordErrorMeter = async (req, res, next) => {
@@ -451,6 +453,206 @@ const getJobChartData = async (req, res) => {
     }
 };
 
+const getDataForExport = async (req, res, next) => {
+
+    const jobs = await JobHistory.findAll({
+        where: { status: "Đã cập nhật hệ thống" },
+        include: [
+            { model: User, attributes: ["user_id", "full_name"] },
+            {
+                model: Job,
+                include: [
+                    {
+                        model: Meter,
+                        as: "NewMeter",
+                        attributes: ["serial_number", "status", "note"]
+                    }
+                ]
+            }
+        ]
+    });
+
+    return jobs.map(j => ({
+        history_id: j.history_id,
+        job_id: j.job_id,
+        history_status: j.status,
+        history_task_type: j.task_type,
+        history_createdAt: j.createdAt,
+        history_updatedAt: j.updatedAt,
+
+        user_id: j.User?.user_id,
+        user_full_name: j.User?.full_name,
+
+        job_status: j.Job?.status,
+        job_responsible_user_id: j.Job?.responsible_user_id,
+        job_task_type: j.Job?.task_type,
+        customer_name: j.Job?.customer_name,
+        address: j.Job?.address,
+        meter_book_number: j.Job?.meter_book_number,
+        meter_value: j.Job?.meter_value,
+        failure_reason: j.Job?.failure_reason,
+        replacement_serial: j.Job?.replacement_serial,
+        emergency_replacement: j.Job?.emergency_replacement,
+        photo_url: j.Job?.photo_url,
+        job_createdAt: j.Job?.createdAt,
+        job_updatedAt: j.Job?.updatedAt,
+
+        new_meter_serial: j.Job?.NewMeter?.serial_number,
+        new_meter_status: j.Job?.NewMeter?.status,
+        new_meter_note: j.Job?.NewMeter?.note
+    }));
+}
+
+const exportReportFile = async (req, res) => {
+    try {
+        const { month, year } = req.query;
+
+        let where = {};
+        if (month && year) {
+            const startDate = new Date(year, month - 1, 1);
+            const endDate = new Date(year, month, 0, 23, 59, 59);
+            where.createdAt = { [Op.between]: [startDate, endDate] };
+        }
+
+        const data = await getDataForExport(where);
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Báo cáo công việc');
+
+        // Đặt font và wrapText mặc định cho toàn bộ sheet
+        worksheet.eachRow((row) => {
+            row.eachCell((cell) => {
+                cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+                cell.font = { name: 'Times New Roman', size: 11 };
+            });
+        });
+
+        // Đặt độ rộng cột
+        const columnWidths = [6, 10, 15, 15, 20, 15, 20, 15, 15, 15, 25, 15, 20, 30];
+        worksheet.columns = columnWidths.map((w) => ({ width: w }));
+
+        // Logo
+        const logoPath = path.join(__dirname, '../publics/logo.png');
+        const logoId = workbook.addImage({
+            filename: logoPath,
+            extension: 'png',
+        });
+        worksheet.addImage(logoId, {
+            tl: { col: 0, row: 0 },
+            ext: { width: 100, height: 100 }, // giữ tỉ lệ chuẩn (cỡ nhỏ vừa phải)
+        });
+
+        // Dòng tiêu đề
+        worksheet.mergeCells('C2:H2');
+        worksheet.getCell('C2').value = 'BÁO CÁO CÔNG VIỆC';
+        worksheet.getCell('C2').font = { bold: true, size: 20 };
+        worksheet.getCell('C2').alignment = { vertical: 'middle', horizontal: 'left' };
+
+        worksheet.mergeCells('C3:H3');
+        worksheet.getCell('C3').value = 'ĐỘI KDNS BẮC THĂNG LONG';
+        worksheet.getCell('C3').font = { bold: true, size: 14, italic: true };
+        worksheet.getCell('C3').alignment = { vertical: 'middle', horizontal: 'left' };
+
+        // Header
+        const headerRow1 = [
+            'STT',
+            { name: 'Thông tin công việc', span: 5 },
+            { name: 'Thông tin đồng hồ', span: 6 },
+            { name: 'Thông tin khách hàng', span: 2 },
+        ];
+        const headerRow2 = [
+            'Mã CV',
+            'Bộ phận',
+            'Nhân viên',
+            'Trạng thái',
+            'Ngày',
+            'Serial đồng hồ thay thế',
+            'Số đọc đồng hồ',
+            'Chỉ số đồng hồ',
+            'Tình trạng',
+            'Ghi chú',
+            'Thay thế đột xuất',
+            'Họ tên',
+            'Địa chỉ',
+        ];
+
+        // Hàng 4
+        worksheet.mergeCells('A5:A6');
+        worksheet.getCell('A5').value = headerRow1[0];
+        worksheet.getCell('A5').alignment = { vertical: 'middle', horizontal: 'center' };
+
+        worksheet.mergeCells('B5:F5');
+        worksheet.getCell('B5').value = headerRow1[1].name;
+
+        worksheet.mergeCells('G5:K5');
+        worksheet.getCell('G5').value = headerRow1[2].name;
+
+        worksheet.mergeCells('L5:N5');
+        worksheet.getCell('L5').value = headerRow1[3].name;
+
+        // hàng 6
+        headerRow2.forEach((text, index) => {
+            worksheet.getRow(6).getCell(index + 2).value = text; // index+2 nghĩa là từ cột B
+        });
+
+        // Style header
+        worksheet.getRow(5).font = { bold: true };
+        worksheet.getRow(6).font = { bold: true };
+        worksheet.getRow(5).alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getRow(6).alignment = { vertical: 'middle', horizontal: 'center' };
+
+        // Đổ data
+        data.forEach((item, index) => {
+            worksheet.addRow([
+                index + 1,                             // STT
+                item.job_id,                           // Mã CV
+                item.history_task_type,                // Bộ phận
+                item.user_full_name,                   // Nhân viên
+                item.history_status,                   // Trạng thái
+                item.job_createdAt.toLocaleDateString('vi-VN'), // Ngày
+                item.new_meter_serial,                 // Serial đồng hồ thay thế
+                item.meter_book_number,                // Sổ GCS (nếu bạn muốn để đây)
+                item.meter_value,                      // Chỉ số đồng hồ
+                item.new_meter_status,                 // Tình trạng
+                item.new_meter_note || '',             // Ghi chú
+                item.emergency_replacement ? 'X' : '', // Thay thế đột xuất
+                item.customer_name,                    // Họ tên KH
+                item.address                           // Địa chỉ KH
+            ]);
+        });
+
+        // Kẻ viền toàn bộ bảng
+        worksheet.eachRow((row, rowNumber) => {
+            if (rowNumber >= 5) {
+                row.eachCell((cell) => {
+                    cell.border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' },
+                    };
+                    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+                });
+            }
+        });
+
+        // Xuất file
+        res.setHeader(
+            'Content-Type',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+        res.setHeader('Content-Disposition', 'attachment; filename=report.xlsx');
+
+        await workbook.xlsx.write(res);
+        res.end();
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Có lỗi khi xuất file');
+    }
+};
+
+
+
 
 module.exports = {
     recordErrorMeter,
@@ -464,5 +666,6 @@ module.exports = {
     completeProjectDocument,
     getJobHistory,
     getJobChartData,
-    updateJob
+    updateJob,
+    exportReportFile
 }

@@ -1,16 +1,20 @@
 .sidebar {
-    background: linear-gradient(180deg, #1e293b, #0f172a);
-    color: #fff;
+    background: linear-gradient(180deg, #d4d7db, #cbd5e1);
+    /* xám sáng nhẹ */
+    color: #111;
+    /* chữ tối cho dễ đọc */
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
 
 .sidebar .user-info {
-    background: rgba(255, 255, 255, 0.05);
+    background: linear-gradient(180deg, #d4d7db);
+    /* chuyển sang tối nhẹ để phù hợp nền sáng */
     padding: 15px;
     text-align: center;
 }
+
 
 .sidebar .user-info div {
     font-size: 0.9rem;
@@ -27,7 +31,7 @@
 .features-list-title {
     font-weight: bold;
     font-size: 0.95rem;
-    color: #93c5fd;
+    color: black;
     margin-bottom: 15px;
     display: flex;
     align-items: center;
@@ -41,15 +45,19 @@
 }
 
 .features-list .menu-item {
-    background: rgba(255, 255, 255, 0.05);
+    background: linear-gradient(180deg, #f8fafc, #e2e8f0);
+    /* sáng hơn nhưng đậm hơn nền */
     padding: 10px 12px;
-    border-radius: 8px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
     transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
     margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    /* nhẹ nhàng để nổi lên */
 }
 
 .features-list .menu-item:hover {
@@ -60,8 +68,8 @@
 
 /* Áp dụng gradient nền giống sidebar desktop */
 .offcanvas {
-    background: linear-gradient(180deg, #1e293b, #0f172a);
-    color: #fff !important;
+    background: linear-gradient(180deg, #d4d7db, #cbd5e1);
+    color: black !important;
     width: 250px !important;
 }
 
@@ -74,7 +82,7 @@
 }
 
 .offcanvas .user-info {
-    background: rgba(255, 255, 255, 0.05);
+    background: linear-gradient(180deg, #d4d7db, #cbd5e1);
     padding: 15px;
     text-align: center;
 }
@@ -86,7 +94,7 @@
 }
 
 .offcanvas .menu-item {
-    background: rgba(255, 255, 255, 0.05);
+    background: linear-gradient(180deg, #d4d7db, #cbd5e1);
     padding: 10px 12px;
     border-radius: 8px;
     cursor: pointer;

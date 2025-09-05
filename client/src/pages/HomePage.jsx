@@ -43,7 +43,7 @@ const HomePage = () => {
                 userInfo.role === 'TT' &&
                 <div className="menu-item" onClick={() => { navigate("/emergency-replacement"); handleClose(); }}>Thay thế đột xuất</div>
             }
-            <div className="menu-item" onClick={() => { navigate("/notifications"); handleClose(); }}>Thông báo</div>
+            {/* <div className="menu-item" onClick={() => { navigate("/notifications"); handleClose(); }}>Thông báo</div> */}
             <div className="menu-item" onClick={() => { navigate("/job-history"); handleClose(); }}>Lịch sử công việc</div>
             <div className="menu-item" onClick={() => { navigate("/chart"); handleClose(); }}>Thống kê</div>
         </>
