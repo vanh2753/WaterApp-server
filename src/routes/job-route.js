@@ -11,7 +11,8 @@ const { recordErrorMeter,
     getJobHistory,
     getJobChartData,
     updateJob,
-    exportReportFile } = require('../controllers/job-controller')
+    exportReportFile,
+    checkHasNewJob } = require('../controllers/job-controller')
 const { authenticateToken } = require('../middlewares/authenticateToken')
 
 router.post('/record-error-meter', authenticateToken, recordErrorMeter)
@@ -22,6 +23,7 @@ router.get('/get-completed-replacement-jobs', authenticateToken, getCompletedRep
 router.get('/get-job-history', authenticateToken, getJobHistory)
 router.get('/get-job-chart-data', authenticateToken, getJobChartData)
 router.get('/export-file', exportReportFile)
+router.get('/new-job-notification', authenticateToken, checkHasNewJob)
 router.post('/handle-flushing/:job_id', authenticateToken, handleflushing)
 router.post('/complete-meter-replacement/:job_id', authenticateToken, completeMeterReplacement)
 router.post('/updated-in-system/:job_id', authenticateToken, updatedInSystem)

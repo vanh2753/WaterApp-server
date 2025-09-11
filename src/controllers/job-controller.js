@@ -654,6 +654,65 @@ const exportReportFile = async (req, res) => {
     }
 };
 
+const checkHasNewJob = async (req, res, next) => {
+    try {
+        const { role } = req.user; // role lấy từ token / middleware
+        let whereCondition = {};
+
+        switch (role) {
+            case "TP":
+                // Nếu TP không có job "new" riêng thì để count = 0
+                return res.status(200).json({
+                    EC: 0,
+                    EM: "Không có công việc cần kiểm tra cho role này",
+                    DT: { count: 0 },
+                });
+
+            case "GT":
+                return res.status(200).json({
+                    EC: 0,
+                    EM: "Không có công việc cần kiểm tra cho role này",
+                    DT: { count: 0 },
+                });
+
+            case "QLM":
+                whereCondition.status = "Mới";
+                break;
+
+            case "TT":
+                whereCondition.status = "Chờ Thanh tra";
+                break;
+
+            case "KD":
+                whereCondition.status = "Đã thay thế";
+                break;
+
+            case "KT":
+                whereCondition.status = {
+                    [Op.in]: ["Đã cập nhật hệ thống", "Hoàn thiện hồ sơ", "Đã thay thế"],
+                };
+                break;
+
+            default:
+                return res.status(403).json({
+                    EC: 1,
+                    EM: "Role không hợp lệ",
+                    DT: { count: 0 },
+                });
+        }
+
+        const count = await Job.count({ where: whereCondition });
+
+        return res.status(200).json({
+            EC: 0,
+            EM: "Kiểm tra công việc mới thành công",
+            DT: { count },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 
 
 
@@ -670,5 +729,6 @@ module.exports = {
     getJobHistory,
     getJobChartData,
     updateJob,
-    exportReportFile
+    exportReportFile,
+    checkHasNewJob
 }
